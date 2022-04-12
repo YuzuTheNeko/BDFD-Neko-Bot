@@ -27,7 +27,7 @@ export default new Command<[
         const canvas = createCanvas(200, 200)
         const ctx = canvas.getContext('2d')
 
-        ctx.fillStyle = value.replace("#", '')
+        ctx.fillStyle = value
         
         ctx.rect(0, 0, 200, 200)
         ctx.fill()
