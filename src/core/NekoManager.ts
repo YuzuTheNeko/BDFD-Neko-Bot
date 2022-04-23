@@ -67,6 +67,7 @@ export class NekoManager {
 
     constructor(client: NekoClient) {
         this.client = client
+        this.refreshCache()
     }
 
     guild(id: string) {
@@ -131,6 +132,14 @@ export class NekoManager {
     @WrapAsyncMethodWithErrorHandler()
     async getSystemMembers(id: string): Promise<Option<SystemMemberRequest[]>> {
         return await axios.get<SystemMemberRequest[]>(`https://api.pluralkit.me/v2/systems/${id}/members`).then(c => c.data)
+    }
+
+    refreshCache() {
+        setInterval(async () => {
+            for (const [id] of this.fronters) {
+                await this.getFrontingMember(id, false).catch(noop)
+            }
+        }, 30000)
     }
 
     @WrapAsyncMethodWithErrorHandler()
