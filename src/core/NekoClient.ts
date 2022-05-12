@@ -1,4 +1,4 @@
-import { Client, ClientOptions, ColorResolvable, GuildMember, MessageEmbed, TextChannel, User } from "discord.js";
+import { Client, ClientOptions, Collection, ColorResolvable, GuildMember, MessageEmbed, TextChannel, User } from "discord.js";
 import { BuildType } from "../typings/enums/BuildType";
 import config from "../config.json"
 import { WrapAsyncMethodWithErrorHandler } from "../util/decorators/WrapMethodWithErrorHandler";
@@ -6,10 +6,17 @@ import { NekoManager } from "./NekoManager";
 import { DatabaseTables } from "../util/constants/DatabaseTables";
 import { Column } from "dbdts.db";
 import { DatabaseInterface } from "../typings/interfaces/database/DatabaseInterface";
+import { SearchQuery } from "yande.re-api/dist/typings/interfaces/SearchQuery";
+import { search } from "yande.re-api";
+import noop from "../functions/noop";
+import { stringify } from "querystring";
+import cast from "../functions/cast";
+import { PostCacheData } from "../typings/interfaces/PostCacheData";
 
 export class NekoClient extends Client<true> {
     #mode!: BuildType
     manager = new NekoManager(this)
+    postCache = new Collection<string, PostCacheData>()
 
     constructor(options: ClientOptions) {
         super(options)
@@ -17,6 +24,31 @@ export class NekoClient extends Client<true> {
 
     get mode() {
         return this.#mode
+    }
+
+    async yandere(query: SearchQuery) {
+        const str = stringify(cast(query))
+
+        const existing = this.postCache.get(str)
+
+        if (existing) {
+            existing.timeout.refresh()
+            return existing.posts
+        }
+
+        const got = await search(query)
+        .catch(noop)
+
+        if (!got || !got.length) return []
+
+        this.postCache.set(str, {
+            posts: got,
+            timeout: setTimeout(() => {
+                this.postCache.delete(str)
+            }, 60_000)
+        })
+
+        return got
     }
 
     get prefixes() {

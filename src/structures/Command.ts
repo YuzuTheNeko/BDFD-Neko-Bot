@@ -1,5 +1,5 @@
 import { capture, ParsedContentData } from "arg-capturer";
-import { GuildChannel, Interaction, Message, MessageEmbed, User } from "discord.js";
+import { GuildChannel, Interaction, Message, MessageEmbed, TextChannel, User } from "discord.js";
 import { type } from "os";
 import { NekoClient } from "../core/NekoClient";
 import cast from "../functions/cast";
@@ -407,6 +407,19 @@ export class Command<T = unknown[], K extends ParsedContentData["flags"] = Parse
                     .setDescription(`This command cannot be used in a guild.`)
                 ]
             })
+            return false
+        }
+
+        if (this.data.category === 'nsfw' && !(channel as TextChannel).nsfw) {
+            if (send) {
+                channel.send({
+                    embeds: [
+                        client.embed(message.member!, 'RED')
+                        .setTitle(`Explicit Command`)
+                        .setDescription(`You cannot use this command here.`)
+                    ]
+                })
+            }
             return false
         }
 

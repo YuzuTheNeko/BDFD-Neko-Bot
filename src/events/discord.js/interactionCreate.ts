@@ -10,9 +10,11 @@ import handleNicknameRequest from "../../handling/interactions/handleNicknameReq
 import handleRndInteraction from "../../handling/interactions/handleRndInteraction";
 import handleSystemPagination from "../../handling/interactions/handleSystemPagination";
 import handleUserLocale from "../../handling/interactions/handleUserLocale";
+import handleYandereButtons from "../../handling/interactions/handleYandereButtons";
 
 export default createDiscordEvent("interactionCreate", async function(i) {
     if (i.isButton()) {
+        ErrorHandler.wrap(handleYandereButtons).runAsync(this, cast(i))
         ErrorHandler.wrap(handleNicknameRequest).runAsync(this, cast(i))
         ErrorHandler.wrap(handleUserLocale).runAsync(this, cast(i))
         ErrorHandler.wrap(handleMusicQueue).runAsync(this, cast(i))
