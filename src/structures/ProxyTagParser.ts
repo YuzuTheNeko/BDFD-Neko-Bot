@@ -6,6 +6,8 @@ interface Found {
     content: string
 }
 
+const ESCAPE_REGEX = /(\$|\^|\+|\[|\]|\.|\*)/g
+
 interface CachedData {
     regex: RegExp
     suffixes: Set<string>
@@ -92,8 +94,8 @@ export class ProxyTagParser {
         const regex = new RegExp(`(${
             tags.map(
                 c => [
-                    c.prefix === '[' ? `\\${c.prefix}` : c.prefix, 
-                    c.suffix === ']' ? `\\${c.suffix}` : c.suffix
+                    c.prefix?.replaceAll(ESCAPE_REGEX, '\\$1'),
+                    c.suffix?.replaceAll(ESCAPE_REGEX, '\\$1')
                 ]
                 .filter(Boolean).join('|')
             ).join('|')
