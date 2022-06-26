@@ -18,7 +18,8 @@ export default new Command<[
     ],
     roles: [
         StaffRoles.ADMIN_TEST,
-        StaffRoles.STAFF
+        StaffRoles.LEAD_STAFF,
+        StaffRoles.MODERATOR
     ],
     execute: async function(message, [ channel ]) {
         channel = channel ?? message.channel

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { execSync } from "child_process";
 import { Database } from "dbdts.db";
-import { ClientEvents, Collection, GuildMember, Message, Role, TextChannel, Webhook, WebhookClient } from "discord.js";
+import { ClientEvents, Collection, GuildMember, Message, MessageApplicationCommandData, Role, TextChannel, UserApplicationCommandData, Webhook, WebhookClient } from "discord.js";
 import { readdirSync } from "fs";
 import Parser from "ms-utility";
 import cast from "../functions/cast";
@@ -28,6 +28,8 @@ import { NekoClient } from "./NekoClient";
 import { CoffeeLava, LavaEvents } from "lavacoffee"
 import { LavalinkGuild } from "../structures/LavalinkGuild";
 import { DatabaseTables } from "../typings/interfaces/database/DatabaseTables";
+import Roles from "../util/constants/Roles";
+import { WithExecutor } from "../typings/types/WithExecution";
 
 export class NekoManager {
     client: NekoClient
@@ -35,8 +37,12 @@ export class NekoManager {
     guilds = new Collection<string, LavalinkGuild>()
     settings = new Collection<string, GuildSettingsData>()
 
+    contextMenus = new Collection<string, WithExecutor<MessageApplicationCommandData | UserApplicationCommandData>>()
+
     systemMembers = new Collection<string, SystemMemberData>()
     fronters = new Collection<string, SystemMemberRequest>()
+    systemMemberList = new Collection<string, SystemMemberRequest[]>()
+
     cache = new CacheRecord<CacheItems>()
     parser = new Parser(DurationUnits)
     giveaways = new Collection<string, Giveaway>()
@@ -74,11 +80,26 @@ export class NekoManager {
         return this.guilds.ensure(id, () => new LavalinkGuild(this, id))
     }
     
+    hasSystemPerms(member: Option<GuildMember>) {
+        return member && [
+            Roles.SYSTEM_PERMS,
+            Roles.TEST_SYSTEM_PERMS
+        ].some(id => member!.roles.cache.has(id))
+    }
+
+    loadContextMenus() {
+        for (const file of readdirSync(`dist/contexts`)) {
+            const got = require(`../contexts/${file}`).default as WithExecutor<MessageApplicationCommandData | UserApplicationCommandData>
+            
+            this.contextMenus.set(got.name, got)
+        }
+    }
+
     @WrapAsyncMethodWithErrorHandler()
     async getChannelWebhook(channel: TextChannel): Promise<Option<WebhookClient>> {
         const data = this.channel(channel.id)
 
-        const webhook = data.webhook_url ? await new WebhookClient({ url: data.webhook_url }) : channel.permissionsFor(this.client.user)?.has('MANAGE_WEBHOOKS') ? await channel.createWebhook("System Ref").catch(noop) : null
+        const webhook = data.webhook_url ? new WebhookClient({ url: data.webhook_url }) : channel.permissionsFor(this.client.user)?.has('MANAGE_WEBHOOKS') ? await channel.createWebhook("System Ref").catch(noop) : null
 
         if (!webhook) {
             return null
@@ -131,7 +152,12 @@ export class NekoManager {
 
     @WrapAsyncMethodWithErrorHandler()
     async getSystemMembers(id: string): Promise<Option<SystemMemberRequest[]>> {
-        return await axios.get<SystemMemberRequest[]>(`https://api.pluralkit.me/v2/systems/${id}/members`).then(c => c.data)
+        const existing = this.systemMemberList.get(id)
+        if (existing) return existing
+
+        const data = await axios.get<SystemMemberRequest[]>(`https://api.pluralkit.me/v2/systems/${id}/members`).then(c => c.data)
+        this.systemMemberList.set(id, data)
+        return data
     }
 
     refreshCache() {
@@ -150,7 +176,7 @@ export class NekoManager {
 
         const request = await axios.get<SystemMemberFrontRequest>(`https://api.pluralkit.me/v2/systems/${id}/fronters`).catch(noop)
 
-        if (!request || !request.data.members.length) return null
+        if (!request || !request.data?.members?.length) return null
 
         const member = request.data.members[0]
 

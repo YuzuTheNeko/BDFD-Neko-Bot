@@ -1,4 +1,4 @@
-import { ButtonInteraction, CacheType, CommandInteraction, ContextMenuInteraction, SelectMenuInteraction } from "discord.js";
+import { ButtonInteraction, CacheType, CommandInteraction, ContextMenuInteraction, ModalSubmitInteraction, SelectMenuInteraction } from "discord.js";
 import { NekoClient } from "../core/NekoClient";
 import { Async } from "../typings/types/Async";
 
@@ -6,6 +6,7 @@ export interface Interactions<T extends CacheType = 'cached'> {
     button: ButtonInteraction<T>
     menu: SelectMenuInteraction<T>
     context: ContextMenuInteraction<T>
+    modal: ModalSubmitInteraction<T>
     slash: CommandInteraction<T>
 }
 

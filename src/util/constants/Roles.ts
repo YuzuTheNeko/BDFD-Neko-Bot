@@ -1,0 +1,4 @@
+export default {
+    SYSTEM_PERMS: "986980239592808496",
+    TEST_SYSTEM_PERMS: '990346445582372874'
+} as const 

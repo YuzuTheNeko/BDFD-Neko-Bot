@@ -1,16 +1,14 @@
 import displaySystemMembers from "../../functions/displaySystemMembers";
 import pageCountFor from "../../functions/pageCountFor";
 import { Command } from "../../structures/Command";
+import Roles from "../../util/constants/Roles";
 import StaffRoles from "../../util/constants/StaffRoles";
 
 export default new Command<[string]>({
     name: 'members',
     description: 'Gets system members of a system reference.',
     roles: [
-        StaffRoles.STAFF,
-        StaffRoles.LEAD_STAFF,
-        StaffRoles.ADMIN_TEST,
-        StaffRoles.MODERATOR
+        Roles.SYSTEM_PERMS
     ],
     args: [
         {

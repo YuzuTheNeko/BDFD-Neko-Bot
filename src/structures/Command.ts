@@ -7,6 +7,7 @@ import cleanID from "../functions/cleanID";
 import createSelector from "../functions/createSelector";
 import fetchMember from "../functions/fetchMember";
 import generateAlias from "../functions/generateAlias";
+import handleProxyTags from "../handling/handleProxyTags";
 import inRange from "../functions/inRange";
 import isDiscordID from "../functions/isDiscordID";
 import matches from "../functions/matches";
@@ -58,7 +59,7 @@ export class Command<T = unknown[], K extends ParsedContentData["flags"] = Parse
         const prefix = client.prefixes.find(c => message.content.startsWith(c))
 
         if (!prefix) {
-            await handleAutoProxy(client, message)
+            await handleProxyTags(client, message)
             return;
         };
 
@@ -67,7 +68,7 @@ export class Command<T = unknown[], K extends ParsedContentData["flags"] = Parse
         const cmd = rawArgs.shift()?.toLowerCase()
 
         if (!cmd) {
-            await handleAutoProxy(client, message)
+            await handleProxyTags(client, message)
             return;
         };
 
@@ -80,7 +81,7 @@ export class Command<T = unknown[], K extends ParsedContentData["flags"] = Parse
         )
 
         if (!command) {
-            await handleAutoProxy(client, message)
+            await handleProxyTags(client, message)
             return
         };
 

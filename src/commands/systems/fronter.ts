@@ -1,6 +1,7 @@
 import { User } from "discord.js";
 import displaySystemMember from "../../functions/displaySystemMember";
 import { Command } from "../../structures/Command";
+import Roles from "../../util/constants/Roles";
 import StaffRoles from "../../util/constants/StaffRoles";
 
 export default new Command<[
@@ -16,10 +17,7 @@ export default new Command<[
         }
     ],
     roles: [
-        StaffRoles.STAFF,
-        StaffRoles.LEAD_STAFF,
-        StaffRoles.ADMIN_TEST,
-        StaffRoles.MODERATOR
+        Roles.SYSTEM_PERMS
     ],
     execute: async function(message, [ user ]) {
         user = user ?? message.author

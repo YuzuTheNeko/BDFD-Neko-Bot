@@ -21,7 +21,7 @@
     "canvas": "^2.9.1",
     "chalk": "^4.1.2",
     "dbdts.db": "^4.2.0",
-    "discord.js": "^13.6.0",
+    "discord.js": "^13.8.1",
     "lavacoffee": "^1.5.2",
     "ms-utility": "^3.2.0",
     "yande.re-api": "^1.0.1"

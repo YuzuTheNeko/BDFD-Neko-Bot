@@ -14,7 +14,7 @@ export interface SystemMemberRequest {
     created: string
     keep_proxy: boolean
     proxy_tags: {
-        prefix: string
+        prefix: Option<string>
         suffix: Option<string>
     }[]
     privacy: null
